@@ -70,9 +70,9 @@ console.log(APP_AUTHOR);
 
 program
   .version(APP_VERSION)
-  .argument('<sourcePath>', 'Root folder for source files.')
-  .argument('<propertyName>', 'Property name to add to the Frontmatter.')
-  .argument('<propertyValue>', 'Property value for the provided propertyName.')
+  .argument('<sourcePath>', 'Root folder location for source files')
+  .argument('<propertyName>', 'Property name to add to the Frontmatter')
+  .argument('<propertyValue>', 'Property value for the provided propertyName')
   .option('-d, --debug', 'Debug mode')
   .option('-o, --override', 'Override existing property')
   .action((sourcePath, propertyName, propertyValue) => {
@@ -109,7 +109,7 @@ program
       if (tempDoc.length > 0) {
         // convert the YAML frontmatter to a JSON object
         let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
-        if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName]) ) {
+        if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
           log.debug(`Adding ${propertyName}: ${propertyValue}`);
           // Add our property and value to the frontmatter
           frontmatter[propertyName] = propertyValue;
