@@ -6,6 +6,10 @@
  * Created Aptil 2021
  */
 
+// TODO: Add command-line arguments to specify the property name and value
+// TODO: Add a command-line argument to specify the source folder
+// TODO: add a command-line flag to overwrite exiting properties
+
 import fs from 'fs-extra';
 import path from 'path';
 import YAML from 'yaml'
@@ -15,6 +19,10 @@ var log = logger();
 
 const APP_NAME = '\nYAML Add Property';
 const APP_AUTHOR = 'by John M. Wargo (https://johnwargo.com)';
+// get CR and/or LF, accommodates DOS and Unix file formats
+// const YAML_PATTERN = /---[\r\n].*?[\r\n]---/s
+const YAML_PATTERN = /(?<=---[\r\n]).*?(?=[\r\n]---)/s
+// https://stackoverflow.com/questions/75845110/javascript-regex-to-replace-yaml-frontmatter/75845227#75845227
 
 var fileList: String[] = [];
 
@@ -94,7 +102,9 @@ log.debug('Debug mode enabled\n');
 log.debug(`cwd: ${process.cwd()}`);
 
 // TODO: Ask for the source folder
-let sourceFolder = 'src';
+let sourceFolder = 'posts';
+let propName = 'newProperty';
+let propValue = 'newValue';
 
 fileList = getFileList(sourceFolder, debugMode);
 if (fileList.length < 1) {
@@ -105,12 +115,26 @@ if (fileList.length < 1) {
 log.info(`Located ${fileList.length} files`);
 if (debugMode) console.dir(fileList);
 
-fileList.forEach(function (item) {
-  // TODO: Load the YAML frontmatter
+fileList.forEach(function (theFile: any) {
 
-  // TODO: Add our property to it
+  log.debug(`Reading ${theFile}`);
+  let tempFile = fs.readFileSync(theFile, 'utf8');
+  // get the YAML frontmatter
+  let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
+  // convert the YAML frontmatter to a JSON object
+  let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+  if (!frontmatter[propName]) {
+    // Add our property and value to the frontmatter
+    frontmatter[propName] = propValue;    
+    // convert the JSON frontmatter to YAML format
+    let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
+    // replace the YAML frontmatter in the file
+    tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
 
-
-  // TODO: Write the Frontmatter back to the file
+    log.info(`Writing changes to ${theFile}`);
+    fs.writeFileSync(theFile, tempFile);
+  } else {
+    log.warn(`'${propName}' already exists in ${theFile}`);
+  }
 
 });

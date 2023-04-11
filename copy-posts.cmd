@@ -1,0 +1,1 @@
+copy D:\dev\node\11ty-cat-pages\src\posts\* D:\dev\node\yaml-add-property\posts\

@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 import fs from 'fs-extra';
 import path from 'path';
+import YAML from 'yaml';
 import logger from 'cli-logger';
 var log = logger();
 const APP_NAME = '\nYAML Add Property';
 const APP_AUTHOR = 'by John M. Wargo (https://johnwargo.com)';
+const YAML_PATTERN = /(?<=---[\r\n]).*?(?=[\r\n]---)/s;
 var fileList = [];
 function compareFunction(a, b) {
     if (a.category < b.category) {
@@ -66,7 +68,9 @@ const debugMode = myArgs.includes('-d');
 log.level(debugMode ? log.DEBUG : log.INFO);
 log.debug('Debug mode enabled\n');
 log.debug(`cwd: ${process.cwd()}`);
-let sourceFolder = 'src';
+let sourceFolder = 'posts';
+let propName = 'newProperty';
+let propValue = 'newValue';
 fileList = getFileList(sourceFolder, debugMode);
 if (fileList.length < 1) {
     log.error('\nNo files found in the target folder, exiting');
@@ -75,5 +79,19 @@ if (fileList.length < 1) {
 log.info(`Located ${fileList.length} files`);
 if (debugMode)
     console.dir(fileList);
-fileList.forEach(function (item) {
+fileList.forEach(function (theFile) {
+    log.debug(`Reading ${theFile}`);
+    let tempFile = fs.readFileSync(theFile, 'utf8');
+    let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
+    let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+    if (!frontmatter[propName]) {
+        frontmatter[propName] = propValue;
+        let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
+        tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
+        log.info(`Writing changes to ${theFile}`);
+        fs.writeFileSync(theFile, tempFile);
+    }
+    else {
+        log.warn(`'${propName}' already exists in ${theFile}`);
+    }
 });
