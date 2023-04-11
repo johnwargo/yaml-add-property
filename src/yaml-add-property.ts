@@ -6,10 +6,7 @@
  * Created Aptil 2021
  */
 
-// TODO: Add command-line arguments to specify the property name and value
-// TODO: Add a command-line argument to specify the source folder
-// TODO: add a command-line flag to overwrite exiting properties
-
+import { Command } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
 import YAML from 'yaml'
@@ -19,6 +16,8 @@ var log = logger();
 
 const APP_NAME = '\nYAML Add Property';
 const APP_AUTHOR = 'by John M. Wargo (https://johnwargo.com)';
+const APP_VERSION = '0.0.1';
+const program = new Command();
 // get CR and/or LF, accommodates DOS and Unix file formats
 // const YAML_PATTERN = /---[\r\n].*?[\r\n]---/s
 const YAML_PATTERN = /(?<=---[\r\n]).*?(?=[\r\n]---)/s
@@ -29,15 +28,6 @@ var fileList: String[] = [];
 // ====================================
 // Functions
 // ====================================
-function compareFunction(a: any, b: any) {
-  if (a.category < b.category) {
-    return -1;
-  }
-  if (a.category > b.category) {
-    return 1;
-  }
-  return 0;
-}
 
 function getAllFiles(dirPath: string, arrayOfFiles: string[]) {
   var files = fs.readdirSync(dirPath)
@@ -71,20 +61,6 @@ function directoryExists(filePath: string): boolean {
   return false;
 }
 
-function findFilePath(endPath: string, thePaths: string[]): string {
-  // set the default value, the last path in the array
-  let resStr = path.join(thePaths[thePaths.length - 1], endPath);
-  for (var tmpPath of thePaths) {
-    let destPath: string = path.join(tmpPath, endPath);
-    log.debug(`Checking ${destPath}`);
-    if (directoryExists(destPath)) {
-      resStr = destPath;
-      break;
-    }
-  }
-  return resStr;
-}
-
 // ====================================
 // Start Here!
 // ====================================
@@ -92,49 +68,62 @@ function findFilePath(endPath: string, thePaths: string[]): string {
 console.log(APP_NAME);
 console.log(APP_AUTHOR);
 
-// do we have command-line arguments?
-const myArgs = process.argv.slice(2);
-const debugMode = myArgs.includes('-d');
+program
+  .version(APP_VERSION)
+  .argument('<sourcePath>', 'Root folder for source files.')
+  .argument('<propertyName>', 'Property name to add to the Frontmatter.')
+  .argument('<propertyValue>', 'Property value for the provided propertyName.')
+  .option('-d, --debug', 'Debug mode')
+  .option('-o, --override', 'Override existing property')
+  .action((sourcePath, propertyName, propertyValue) => {
 
-// set the logger log level
-log.level(debugMode ? log.DEBUG : log.INFO);
-log.debug('Debug mode enabled\n');
-log.debug(`cwd: ${process.cwd()}`);
+    const options = program.opts();
+    const debugMode = options.debug;
 
-// TODO: Ask for the source folder
-let sourceFolder = 'posts';
-let propName = 'newProperty';
-let propValue = 'newValue';
+    // set the logger log level
+    log.level(debugMode ? log.DEBUG : log.INFO);
+    log.debug('Debug mode enabled\n');
+    log.debug(`cwd: ${process.cwd()}`);
 
-fileList = getFileList(sourceFolder, debugMode);
-if (fileList.length < 1) {
-  log.error('\nNo files found in the target folder, exiting');
-  process.exit(0);
-}
+    if (!directoryExists(path.join(process.cwd(), sourcePath))) {
+      log.error(`\nSource path '${sourcePath}' does not exist, exiting`);
+      process.exit(1);
+    }
 
-log.info(`Located ${fileList.length} files`);
-if (debugMode) console.dir(fileList);
+    fileList = getFileList(sourcePath, debugMode);
+    if (fileList.length < 1) {
+      log.error('\nNo files found in the target folder, exiting');
+      process.exit(0);
+    }
 
-fileList.forEach(function (theFile: any) {
+    log.info(`Located ${fileList.length} files`);
+    if (debugMode) console.dir(fileList);
 
-  log.debug(`Reading ${theFile}`);
-  let tempFile = fs.readFileSync(theFile, 'utf8');
-  // get the YAML frontmatter
-  let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
-  // convert the YAML frontmatter to a JSON object
-  let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
-  if (!frontmatter[propName]) {
-    // Add our property and value to the frontmatter
-    frontmatter[propName] = propValue;    
-    // convert the JSON frontmatter to YAML format
-    let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
-    // replace the YAML frontmatter in the file
-    tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
+    fileList.forEach(function (theFile: any) {
+      log.debug(`Reading ${theFile}`);
+      let tempFile = fs.readFileSync(theFile, 'utf8');
+      // get the YAML frontmatter
+      let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
+      if (tempDoc.length > 0) {
+        // convert the YAML frontmatter to a JSON object
+        let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+        if (!frontmatter[propertyName]) {
+          log.debug(`Adding ${propertyName}: ${propertyValue}`);
+          // Add our property and value to the frontmatter
+          frontmatter[propertyName] = propertyValue;
+          // convert the JSON frontmatter to YAML format
+          let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' }).trim();
+          // replace the YAML frontmatter in the file
+          tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
+          log.info(`Writing changes to ${theFile}`);
+          fs.writeFileSync(theFile, tempFile);
+        } else {
+          log.warn(`Skipping ${theFile}, '${propertyName}' already exists`);
+        }
+      } else {
+        log.warn(`Skipping ${theFile}, No YAML frontmatter found.`);
+      }
+    });
+  });
 
-    log.info(`Writing changes to ${theFile}`);
-    fs.writeFileSync(theFile, tempFile);
-  } else {
-    log.warn(`'${propName}' already exists in ${theFile}`);
-  }
-
-});
+program.parse();
