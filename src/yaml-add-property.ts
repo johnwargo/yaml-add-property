@@ -106,7 +106,7 @@ log.info(`Located ${fileList.length} files`);
 if (debugMode) console.dir(fileList);
 
 fileList.forEach(function (item) {
-  // TODO: Load the yAML frontmatter
+  // TODO: Load the YAML frontmatter
 
   // TODO: Add our property to it
 
