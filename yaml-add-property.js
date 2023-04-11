@@ -55,8 +55,11 @@ program
     .action((sourcePath, propertyName, propertyValue) => {
     const options = program.opts();
     const debugMode = options.debug;
+    const overrideMode = options.override;
     log.level(debugMode ? log.DEBUG : log.INFO);
-    log.debug('Debug mode enabled\n');
+    log.debug('\nDebug mode enabled');
+    if (overrideMode)
+        log.info('Override mode enabled');
     log.debug(`cwd: ${process.cwd()}`);
     if (!directoryExists(path.join(process.cwd(), sourcePath))) {
         log.error(`\nSource path '${sourcePath}' does not exist, exiting`);
@@ -76,7 +79,7 @@ program
         let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
         if (tempDoc.length > 0) {
             let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
-            if (!frontmatter[propertyName]) {
+            if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
                 log.debug(`Adding ${propertyName}: ${propertyValue}`);
                 frontmatter[propertyName] = propertyValue;
                 let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' }).trim();

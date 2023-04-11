@@ -79,10 +79,12 @@ program
 
     const options = program.opts();
     const debugMode = options.debug;
+    const overrideMode = options.override;
 
     // set the logger log level
     log.level(debugMode ? log.DEBUG : log.INFO);
-    log.debug('Debug mode enabled\n');
+    log.debug('\nDebug mode enabled');
+    if (overrideMode) log.info('Override mode enabled');
     log.debug(`cwd: ${process.cwd()}`);
 
     if (!directoryExists(path.join(process.cwd(), sourcePath))) {
@@ -107,7 +109,7 @@ program
       if (tempDoc.length > 0) {
         // convert the YAML frontmatter to a JSON object
         let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
-        if (!frontmatter[propertyName]) {
+        if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName]) ) {
           log.debug(`Adding ${propertyName}: ${propertyValue}`);
           // Add our property and value to the frontmatter
           frontmatter[propertyName] = propertyValue;
