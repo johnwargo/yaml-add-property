@@ -4,3 +4,5 @@ src/
 # files
 package-lock.json
 tsconfig.json
+changelog.md
+tsconfig.json
