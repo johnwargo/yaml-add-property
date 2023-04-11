@@ -1,0 +1,6 @@
+# folders
+src/
+
+# files
+package-lock.json
+tsconfig.json
