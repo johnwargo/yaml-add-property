@@ -75,6 +75,12 @@ To override the contents of the `layout` property with the value `default` use t
 yaml-add-prop posts layout default -o
 ```
 
+or 
+
+```shell
+yaml-add-prop posts layout default --override
+```
+
 If the `propertyValue` has one or more spaces in it, enclose it in quotes:
 
 ```shell
