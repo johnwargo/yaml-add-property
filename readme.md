@@ -22,6 +22,6 @@ The package supports two required and one optional command-line arguments:
 
 | Argument        | Status      | Description |
 | --------------- | ----------- | ----------- | 
-| `sourcePath`    | Required    | |
-| `propertyName`  | Required    | |
-| `propertyValue` | Optional    |  |
+| `sourcePath`    | Required    | The folder name, relative to the execution folder, for the source files. |
+| `propertyName`  | Required    | The property name added to the YAML frontmatter.                         |
+| `propertyValue` | Optional    | The value assigned to the property added to the frontmatter. When omitted from the command-line, defaults to a blank string (`''`) |
