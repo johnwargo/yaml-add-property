@@ -2,6 +2,8 @@
 
 A command-line utility for adding or modifying a YAML frontmatter property in all files in a particular directory (and all subdirectories therein). Created to enable batch updates of content files with YAML frontmatter. 
 
+[yaml-add-property](https://www.npmjs.com/package/yaml-add-property) on npm.
+
 I created the package to enable me to add a `description` property (with no value) to all of the Post markdown files in an [Eleventy](https://www.11ty.dev/) site, but it works for any file with YAML frontmatter. You can easily use it to add a property and value as well.
 
 **Note:** The utility only modifies top-level YAML properties. It does not support nested properties at this time (but could at some time)
