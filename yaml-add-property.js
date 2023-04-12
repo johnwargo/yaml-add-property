@@ -49,7 +49,7 @@ program
     .version(APP_VERSION)
     .argument('<sourcePath>', 'Root folder location for source files')
     .argument('<propertyName>', 'Property name to add to the Frontmatter')
-    .argument('<propertyValue>', 'Property value for the provided propertyName')
+    .argument('[propertyValue]', 'Property value for the provided propertyName', '')
     .option('-d, --debug', 'Debug mode')
     .option('-o, --override', 'Override existing property')
     .action((sourcePath, propertyName, propertyValue) => {
