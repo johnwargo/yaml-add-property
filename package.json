@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/johnwargo/yaml-add-property.git"
+    "url": "https://github.com/johnwargo/yaml-add-property"
   },
   "type": "module",
   "main": "yaml-add-property.js",
