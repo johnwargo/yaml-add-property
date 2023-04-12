@@ -34,9 +34,55 @@ The command supports two required and one optional command-line arguments:
 | `propertyName`  | Required    | The property name added to the YAML frontmatter.                         |
 | `propertyValue` | Optional    | The value assigned to the property added to the frontmatter. When omitted from the command-line, defaults to a blank string (`''`) |
 
-The command supports two optional command-line options (flags):
+The command supports two optional flags:
 
 | Option (or Flag) | Description|
 | -------------------- | --------------------------------------------------------------------------------- |
 | `-d` or `--debug`    | Debug Mode: Enables debug mode which causes additional output to the console during operation |
 | `-o` or `--override` | Override Mode: By default, the command skips files that already contain the provided property in the file's frontmatter. With this option enabled, the command replaces the existing property value with the provided `propertyValue` argument |
+
+For example, to add an empty `description` property to the YAML frontmatter in all of the files in the `posts` folder, use the following command:
+
+```shell
+yaml-add-prop posts description
+```
+
+For example, to add a `example` property with a value of `test` to the YAML frontmatter in all of the files in the `posts` folder, use the following command:
+
+```shell
+yaml-add-prop posts example test
+```
+
+To enable debug mode while executing the previous example, add a `d` or `--debug` to the command-line arguments as shown in the following example:
+
+```shell
+yaml-add-prop posts example test -d
+```
+
+or
+
+```shell
+yaml-add-prop posts example test --debug
+```
+
+To override the contents of the `layout` property with the value `default` use the following:
+
+```shell
+yaml-add-prop posts layout default -o
+```
+
+If the `propertyValue` has one or more spaces in it, enclose it in quotes:
+
+```shell
+yaml-add-prop posts description "A Sample description"
+```
+
+### Getting Help Or Making Changes
+
+Use [GitHub Issues](https://github.com/johnwargo/yaml-add-property/issues) to get help with this module.
+
+Pull Requests gladly accepted, but only with complete documentation of what the change is, why you made it, and why you think its important to have in the module.
+
+*** 
+
+If this code helps you: <a href="https://www.buymeacoffee.com/johnwargo" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
