@@ -28,15 +28,15 @@ Arguments in angle brackets (< and >) are required, arguments in square brackets
 
 The command supports two required and one optional command-line arguments:
 
-| Argument        | Status      | Description |
-| --------------- | ----------- | ----------- | 
+| Argument        | Status      | Description                                                              |
+| --------------- | ----------- | ------------------------------------------------------------------------ | 
 | `sourcePath`    | Required    | The folder name, relative to the execution folder, for the source files. |
 | `propertyName`  | Required    | The property name added to the YAML frontmatter.                         |
 | `propertyValue` | Optional    | The value assigned to the property added to the frontmatter. When omitted from the command-line, defaults to a blank string (`''`) |
 
 The command supports two optional command-line options (flags):
 
-| Option               | Description |
-| -------------------- | ----------- |
-| `-d` or `--debug`    | Enables debug mode which causes additional output to the console during operation |
-| `-o` or `--override` | |
+| Option               | Description                                                                       |
+| -------------------- | --------------------------------------------------------------------------------- |
+| `-d` or `--debug`    | Debug Mode: Enables debug mode which causes additional output to the console during operation |
+| `-o` or `--override` | Override Mode: By default, the command skips files that already contain the provided property in the file's frontmatter. With this option enabled, the command replaces the existing property value with the provided `propertyValue` argument |
