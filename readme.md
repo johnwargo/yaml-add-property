@@ -24,10 +24,19 @@ To use the package, open a terminal window or command prompt, navigate to a fold
 yaml-add-prop <sourcePath> <propertyName> [propertyValue] [flags]
 ```
 
-The package supports two required and one optional command-line arguments:
+Arguments in angle brackets (< and >) are required, arguments in square brackets ([ and ]) are optional.
+
+The command supports two required and one optional command-line arguments:
 
 | Argument        | Status      | Description |
 | --------------- | ----------- | ----------- | 
 | `sourcePath`    | Required    | The folder name, relative to the execution folder, for the source files. |
 | `propertyName`  | Required    | The property name added to the YAML frontmatter.                         |
 | `propertyValue` | Optional    | The value assigned to the property added to the frontmatter. When omitted from the command-line, defaults to a blank string (`''`) |
+
+The command supports two optional command-line options (flags):
+
+| Option               | Description |
+| -------------------- | ----------- |
+| `-d` or `--debug`    | Enables debug mode which causes additional output to the console during operation |
+| `-o` or `--override` | |
