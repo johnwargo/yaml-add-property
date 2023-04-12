@@ -31,6 +31,5 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.15.5",
-    "eleventy": "^1.0.6"
   }
 }
