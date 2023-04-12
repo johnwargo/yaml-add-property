@@ -36,7 +36,7 @@ The command supports two required and one optional command-line arguments:
 
 The command supports two optional command-line options (flags):
 
-| Option | Description|
+| Option or Flag | Description|
 | -------------------- | --------------------------------------------------------------------------------- |
 | `-d` or `--debug`    | Debug Mode: Enables debug mode which causes additional output to the console during operation |
 | `-o` or `--override` | Override Mode: By default, the command skips files that already contain the provided property in the file's frontmatter. With this option enabled, the command replaces the existing property value with the provided `propertyValue` argument |
