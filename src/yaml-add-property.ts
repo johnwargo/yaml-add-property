@@ -93,7 +93,7 @@ function directoryExists(filePath: string): boolean {
 }
 
 // ====================================
-// Start Here!
+// Start Here
 // ====================================
 
 console.log(APP_NAME);
@@ -143,15 +143,17 @@ program
       // get the YAML frontmatter
       let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
       if (tempDoc.length > 0) {
-
         // get the frontmatter as a string
-        let tmpStr = JSON.stringify(tempDoc)
-        log.info(tmpStr);
+        let tmpStr: string = JSON.stringify(tempDoc)
 
-        // replace all of the carriage returns and linefeeds from the string
-        tmpStr = tmpStr.replace(/[\n\r]+/g, '');
-
+        log.info("1");
         log.info(tmpStr);
+        log.info("2");
+        // replace all of the carriage returns and line feeds from the string
+        tmpStr = tmpStr.replace(/\r/g, '');
+        log.info("3");
+        log.info(tmpStr);
+        log.info("4");
         
         // convert the YAML frontmatter to a JSON object        
         // let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
@@ -167,6 +169,15 @@ program
           frontmatter[propertyName] = propertyValue;
           // convert the JSON frontmatter to YAML format
           let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
+
+          // log.info("1");
+          // log.info(tmpFrontmatter);
+          // // remove all of the carriage returns from the frontmatter
+          // tmpFrontmatter = tmpFrontmatter.replace(/[\r]+/gm, '');
+          // log.info("2");
+          // log.info(tmpFrontmatter);
+          // log.info("3");
+
           // remove the extra carriage return from the end of the frontmatter
           tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
 
