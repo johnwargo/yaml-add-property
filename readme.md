@@ -65,6 +65,8 @@ or
 yaml-add-prop posts example test --debug
 ```
 
+With these examples, the command will generate more output to the console as it executes.
+
 To override the contents of the `layout` property with the value `default` use the following:
 
 ```shell
