@@ -138,20 +138,36 @@ program
     if (debugMode) console.dir(fileList);
 
     fileList.forEach(function (theFile: any) {
-      log.debug(`Reading ${theFile}`);
+      log.debug(`\nReading ${theFile}`);
       let tempFile = fs.readFileSync(theFile, 'utf8');
       // get the YAML frontmatter
       let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
       if (tempDoc.length > 0) {
+
+        // get the frontmatter as a string
+        let tmpStr = JSON.stringify(tempDoc)
+        log.info(tmpStr);
+
+        // replace all of the carriage returns and linefeeds from the string
+        tmpStr = tmpStr.replace(/[\n\r]+/g, '');
+
+        log.info(tmpStr);
+        
         // convert the YAML frontmatter to a JSON object        
-        let frontmatter: any = JSON.parse(JSON.stringify(tempDoc))[0];
+        // let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+        let frontmatter = JSON.parse(tmpStr)[0];
+
+        console.dir(frontmatter);
 
         if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
+          console.log();
           log.debug(`Adding ${propertyName}: ${propertyValue}`);
+
           // Add our property and value to the frontmatter
           frontmatter[propertyName] = propertyValue;
           // convert the JSON frontmatter to YAML format
           let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
+          // remove the extra carriage return from the end of the frontmatter
           tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
 
           // replace the YAML frontmatter in the file
