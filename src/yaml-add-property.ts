@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 /** 
- * Add YAML Property to a file
+ * Add/Update YAML Property in a file's frontmatter
  * by John M. Wargo (https://johnwargo.com)
- * Created Aptil 2021
+ * Created April 2021
  */
+
+// TODO: Fix issue with a second run corrupting the frontmatter
 
 import { Command } from 'commander';
 import fs from 'fs-extra';
@@ -14,7 +16,7 @@ import YAML from 'yaml'
 import logger from 'cli-logger';
 var log = logger();
 
-const APP_NAME = '\nYAML Add Property';
+const APP_NAME = '\nYAML Add/Update Property';
 const APP_AUTHOR = 'by John M. Wargo (https://johnwargo.com)';
 const APP_VERSION = '0.0.1';
 const program = new Command();
@@ -29,24 +31,53 @@ var fileList: String[] = [];
 // Functions
 // ====================================
 
-function getAllFiles(dirPath: string, arrayOfFiles: string[]) {
+function getAllFilesDeep(dirPath: string, fileArray: string[]) {
+  // initialize the file array if it's not already set
+  fileArray = fileArray || []
+  // get all of the files in the directory
   var files = fs.readdirSync(dirPath)
-  arrayOfFiles = arrayOfFiles || []
+  // process the results
   files.forEach(function (file: string) {
-    if (fs.statSync(dirPath + "/" + file).isDirectory()) {
-      arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles)
+    let theFilePath = path.join(dirPath, file);
+    if (fs.statSync(theFilePath).isDirectory()) {
+      fileArray = getAllFilesDeep(theFilePath, fileArray)
     } else {
-      arrayOfFiles.push(path.join(process.cwd(), dirPath, file));
+      fileArray.push(path.join(process.cwd(), dirPath, file));
     }
   });
-  return arrayOfFiles
+  return fileArray
 }
 
-function getFileList(filePath: string, debugMode: boolean): String[] {
-  if (debugMode) console.log();
+function getAllFilesFlat(dirPath: string): string[] {
+  let fileArray: string[] = [];
+  // build a full path pointing to the directory
+  let filePath = path.join(process.cwd(), dirPath);
+  // get all the files in the directory
+  var files = fs.readdirSync(filePath)
+  // loop through each file building the file list
+  files.forEach(function (file: string) {
+    let theFilePath = path.join(filePath, file);
+    log.debug(`Checking ${theFilePath}`);
+    if (!fs.statSync(theFilePath).isDirectory()) {
+      fileArray.push(theFilePath);
+    } else {
+      log.debug(`Skipping ${theFilePath} (directory)`);
+    }
+  });
+  return fileArray;
+}
+
+function generateFileList(filePath: string, flatMode: boolean): String[] {
+  // this function kicks off the process of building the file list
+  // the call to `getAllFiles` is separate because that function is recursive
   log.info('Building file list...');
-  log.debug(`filePath: ${filePath}`);
-  return getAllFiles(filePath, []);
+  if (flatMode) {
+    log.debug('Skipping directory recursion');
+    return getAllFilesFlat(filePath);
+  } else {
+    log.debug('Recursing directories');
+    return getAllFilesDeep(filePath, []);
+  }
 }
 
 function directoryExists(filePath: string): boolean {
@@ -67,6 +98,7 @@ function directoryExists(filePath: string): boolean {
 
 console.log(APP_NAME);
 console.log(APP_AUTHOR);
+console.log();
 
 program
   .version(APP_VERSION)
@@ -75,16 +107,19 @@ program
   .argument('[propertyValue]', 'Property value for the provided propertyName', '')
   .option('-d, --debug', 'Debug mode')
   .option('-o, --override', 'Override existing property')
+  .option('-f, --flat', 'Disable directory recursion')
   .action((sourcePath, propertyName, propertyValue) => {
 
     const options = program.opts();
     const debugMode = options.debug;
     const overrideMode = options.override;
+    const flatMode = options.flat;
 
     // set the logger log level
     log.level(debugMode ? log.DEBUG : log.INFO);
-    log.debug('\nDebug mode enabled');
-    if (overrideMode) log.info('Override mode enabled');
+    log.debug('Option: Debug mode enabled');
+    if (overrideMode) log.info('Option: Override mode enabled');
+    if (flatMode) log.info('Option: Flat mode enabled');
     log.debug(`cwd: ${process.cwd()}`);
 
     if (!directoryExists(path.join(process.cwd(), sourcePath))) {
@@ -92,7 +127,8 @@ program
       process.exit(1);
     }
 
-    fileList = getFileList(sourcePath, debugMode);
+    log.info(`\nSource path: ${sourcePath}`);
+    fileList = generateFileList(sourcePath, flatMode);
     if (fileList.length < 1) {
       log.error('\nNo files found in the target folder, exiting');
       process.exit(0);
@@ -108,7 +144,7 @@ program
       let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
       if (tempDoc.length > 0) {
         // convert the YAML frontmatter to a JSON object        
-        let frontmatter: any = JSON.parse(JSON.stringify(tempDoc))[0];        
+        let frontmatter: any = JSON.parse(JSON.stringify(tempDoc))[0];
 
         if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
           log.debug(`Adding ${propertyName}: ${propertyValue}`);
@@ -116,8 +152,8 @@ program
           frontmatter[propertyName] = propertyValue;
           // convert the JSON frontmatter to YAML format
           let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
-          // tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
-          
+          tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
+
           // replace the YAML frontmatter in the file
           tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
           log.info(`Writing changes to ${theFile}`);
