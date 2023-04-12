@@ -18,6 +18,12 @@ This adds a `yaml-add-prop` command you can use to batch add a YAML property and
 
 ## Usage
 
+To use the package, open a terminal window or command prompt, navigate to a folder near the files you want updated, and execute the following command:
+
+```shell
+yaml-add-prop <sourcePath> <propertyName> [propertyValue] [flags]
+```
+
 The package supports two required and one optional command-line arguments:
 
 | Argument        | Status      | Description |
