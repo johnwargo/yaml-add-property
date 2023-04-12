@@ -12,7 +12,6 @@ import path from 'path';
 import YAML from 'yaml'
 //@ts-ignore
 import logger from 'cli-logger';
-import { timeLog } from 'console';
 var log = logger();
 
 const APP_NAME = '\nYAML Add Property';
