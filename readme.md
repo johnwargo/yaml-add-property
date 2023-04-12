@@ -1,5 +1,7 @@
 # Add YAML Property
 
+**Note:** The package currently has a bug where it corrupts the target files if you run the command against the files a second time. I'll fix this as soon as I can. 
+
 A command-line utility for adding or modifying a YAML frontmatter property in all files in a particular directory (and all subdirectories therein). Created to enable batch updates of content files with YAML frontmatter. 
 
 [yaml-add-property](https://www.npmjs.com/package/yaml-add-property) on npm.

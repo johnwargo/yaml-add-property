@@ -78,11 +78,13 @@ program
         let tempFile = fs.readFileSync(theFile, 'utf8');
         let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
         if (tempDoc.length > 0) {
-            let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+            let tmpStuff = JSON.stringify(tempDoc);
+            tmpStuff = tmpStuff.replace(/(\r\n|\n|\r)/gm, "");
+            let frontmatter = JSON.parse(tmpStuff)[0];
             if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
                 log.debug(`Adding ${propertyName}: ${propertyValue}`);
                 frontmatter[propertyName] = propertyValue;
-                let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' }).trim();
+                let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
                 tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
                 log.info(`Writing changes to ${theFile}`);
                 fs.writeFileSync(theFile, tempFile);

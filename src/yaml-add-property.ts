@@ -12,6 +12,7 @@ import path from 'path';
 import YAML from 'yaml'
 //@ts-ignore
 import logger from 'cli-logger';
+import { timeLog } from 'console';
 var log = logger();
 
 const APP_NAME = '\nYAML Add Property';
@@ -107,14 +108,17 @@ program
       // get the YAML frontmatter
       let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
       if (tempDoc.length > 0) {
-        // convert the YAML frontmatter to a JSON object
-        let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+        // convert the YAML frontmatter to a JSON object        
+        let frontmatter: any = JSON.parse(JSON.stringify(tempDoc))[0];        
+
         if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
           log.debug(`Adding ${propertyName}: ${propertyValue}`);
           // Add our property and value to the frontmatter
           frontmatter[propertyName] = propertyValue;
           // convert the JSON frontmatter to YAML format
-          let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' }).trim();
+          let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
+          // tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
+          
           // replace the YAML frontmatter in the file
           tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
           log.info(`Writing changes to ${theFile}`);
