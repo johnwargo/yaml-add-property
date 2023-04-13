@@ -64,7 +64,7 @@ date: 2021-02-13
 description: ""
 ---
 
-I'm building a web app using Ionic and needed a [Pipe](https://angular.io/guide/pipes){target="_blank"} to transform some data for the app. I'm implementing a CSV file import process and I wanted to display each CSV row as a comma separated list after I'd imported all of it into a JSON object. My goal was to display the list for the user to make sure that the CSV Parsing process worked correctly before completing the import.
+Chuck landjaeger andouille, burgdoggen tail beef shankle sausage tri-tip capicola strip steak bacon. 
 ```
 
 **Note:** If the property already exists in a file's front matter, the module will skip updating the file. To overwrite existing values, use the `-o` or `--overwrite`
