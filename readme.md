@@ -89,14 +89,13 @@ example: testvalue
 ---
 ```
 
-
 If the `propertyValue` has one or more spaces in it, enclose it in quotes:
 
 ```shell
 yaml-add-prop posts description "A Sample description"
 ```
 
-To overwrite the contents of the `layout` property with the value `default` use the following:
+To overwrite the existing contents of the `layout` property with the value `default` use the following:
 
 ```shell
 yaml-add-prop posts layout default -o
