@@ -1,18 +1,16 @@
 # Add YAML Property
 
-**Note:** The package currently has a bug where it corrupts the target files if you run the command against the files a second time. I'll fix this as soon as I can. 
-
 A command-line utility for adding or modifying a YAML frontmatter property in all files in a particular directory (and all subdirectories therein). Created to enable batch updates of content files with YAML frontmatter. 
 
 [yaml-add-property](https://www.npmjs.com/package/yaml-add-property) on npm.
 
-I created the package to enable me to add a `description` property (with no value) to all of the Post markdown files in an [Eleventy](https://www.11ty.dev/) site, but it works for any file with YAML frontmatter. You can easily use it to add a property and value as well.
+I created the module to enable me to add a `description` property (with no value) to all of the Post markdown files in an [Eleventy](https://www.11ty.dev/) site, but it works for any file with YAML frontmatter. You can easily use it to add a property and value as well.
 
 **Note:** The utility only modifies top-level YAML properties. It does not support nested properties at this time (but could at some time)
 
 ## Installation
 
-To install the package, open a terminal window or command prompt and execute the following command:
+To install the module, open a terminal window or command prompt and execute the following command:
 
 ```shell
 npm install -g yaml-add-property
@@ -22,7 +20,7 @@ This adds a `yaml-add-prop` command you can use to batch add a YAML property and
 
 ## Usage
 
-To use the package, open a terminal window or command prompt, navigate to a folder near the files you want updated, and execute the following command:
+To use the module, open a terminal window or command prompt, navigate to a folder near the files you want updated, and execute the following command:
 
 ```shell
 yaml-add-prop <sourcePath> <propertyName> [propertyValue] [flags]
@@ -44,6 +42,9 @@ The command supports two optional flags:
 | -------------------- | --------------------------------------------------------------------------------- |
 | `-d` or `--debug`    | Debug Mode: Enables debug mode which causes additional output to the console during operation |
 | `-o` or `--override` | Override Mode: By default, the command skips files that already contain the provided property in the file's frontmatter. With this option enabled, the command replaces the existing property value with the provided `propertyValue` argument |
+| `-f` or `--flat`     | Flat Mode: Disables recursion when collecting files in `sourcePath`               |
+
+**Note:** You can use any combination of none through all options on the command-line. 
 
 For example, to add an empty `description` property to the YAML frontmatter in all of the files in the `posts` folder, use the following command:
 
@@ -55,6 +56,36 @@ For example, to add a `example` property with a value of `test` to the YAML fron
 
 ```shell
 yaml-add-prop posts example test
+```
+
+If the `propertyValue` has one or more spaces in it, enclose it in quotes:
+
+```shell
+yaml-add-prop posts description "A Sample description"
+```
+
+To override the contents of the `layout` property with the value `default` use the following:
+
+```shell
+yaml-add-prop posts layout default -o
+```
+
+or 
+
+```shell
+yaml-add-prop posts layout default --override
+```
+
+To process only the files in the `sourcePath` directory and not recurse through any subdirectories, enable Flat Mode using `-f` or `--flat` as shown in the following examples:
+
+```shell
+yaml-add-prop posts example test -f
+```
+
+or
+
+```shell
+yaml-add-prop posts example test --flat
 ```
 
 To enable debug mode while executing the previous example, add a `d` or `--debug` to the command-line arguments as shown in the following example:
@@ -70,24 +101,6 @@ yaml-add-prop posts example test --debug
 ```
 
 With these examples, the command will generate more output to the console as it executes.
-
-To override the contents of the `layout` property with the value `default` use the following:
-
-```shell
-yaml-add-prop posts layout default -o
-```
-
-or 
-
-```shell
-yaml-add-prop posts layout default --override
-```
-
-If the `propertyValue` has one or more spaces in it, enclose it in quotes:
-
-```shell
-yaml-add-prop posts description "A Sample description"
-```
 
 ### Getting Help Or Making Changes
 
