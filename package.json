@@ -1,6 +1,6 @@
 {
   "name": "yaml-add-property",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Adds the specified YAML property to all files in the specified directory.",
   "author": "John M. Wargo",
   "license": "MIT",
