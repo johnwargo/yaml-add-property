@@ -140,27 +140,15 @@ program
     fileList.forEach(function (theFile: any) {
       log.debug(`\nReading ${theFile}`);
       let tempFile = fs.readFileSync(theFile, 'utf8');
+      // remove all of the carriage returns from the file
+      tempFile = tempFile.replace(/\r/g, '');
+
       // get the YAML frontmatter
       let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
       if (tempDoc.length > 0) {
-        // get the frontmatter as a string
-        let tmpStr: string = JSON.stringify(tempDoc)
-
-        log.info("1");
-        log.info(tmpStr);
-        log.info("2");
-        // replace all of the carriage returns and line feeds from the string
-        tmpStr = tmpStr.replace(/\r/g, '');
-        log.info("3");
-        log.info(tmpStr);
-        log.info("4");
-        
         // convert the YAML frontmatter to a JSON object        
-        // let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
-        let frontmatter = JSON.parse(tmpStr)[0];
-
-        console.dir(frontmatter);
-
+        let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+        // if (debugMode) console.dir(frontmatter);
         if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
           console.log();
           log.debug(`Adding ${propertyName}: ${propertyValue}`);
@@ -169,18 +157,8 @@ program
           frontmatter[propertyName] = propertyValue;
           // convert the JSON frontmatter to YAML format
           let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
-
-          // log.info("1");
-          // log.info(tmpFrontmatter);
-          // // remove all of the carriage returns from the frontmatter
-          // tmpFrontmatter = tmpFrontmatter.replace(/[\r]+/gm, '');
-          // log.info("2");
-          // log.info(tmpFrontmatter);
-          // log.info("3");
-
           // remove the extra carriage return from the end of the frontmatter
           tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
-
           // replace the YAML frontmatter in the file
           tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
           log.info(`Writing changes to ${theFile}`);

@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc && node yaml-add-property.js -d",
+    "dev": "tsc && node yaml-add-property.js posts property1 value1 -o -d -f",
     "start": "tsc && node yaml-add-property.js"
   },
   "dependencies": {

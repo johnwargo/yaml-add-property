@@ -103,18 +103,12 @@ program
     fileList.forEach(function (theFile) {
         log.debug(`\nReading ${theFile}`);
         let tempFile = fs.readFileSync(theFile, 'utf8');
+        tempFile = tempFile.replace(/\r/g, '');
         let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
         if (tempDoc.length > 0) {
-            let tmpStr = JSON.stringify(tempDoc);
-            log.info("1");
-            log.info(tmpStr);
-            log.info("2");
-            tmpStr = tmpStr.replace(/\r/g, '');
-            log.info("3");
-            log.info(tmpStr);
-            log.info("4");
-            let frontmatter = JSON.parse(tmpStr)[0];
-            console.dir(frontmatter);
+            let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+            if (debugMode)
+                console.dir(frontmatter);
             if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
                 console.log();
                 log.debug(`Adding ${propertyName}: ${propertyValue}`);
