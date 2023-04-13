@@ -6,8 +6,6 @@
  * Created April 2021
  */
 
-// TODO: Fix issue with a second run corrupting the frontmatter
-
 import { Command } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
@@ -150,9 +148,7 @@ program
         let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
         // if (debugMode) console.dir(frontmatter);
         if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
-          console.log();
           log.debug(`Adding ${propertyName}: ${propertyValue}`);
-
           // Add our property and value to the frontmatter
           frontmatter[propertyName] = propertyValue;
           // convert the JSON frontmatter to YAML format
