@@ -106,7 +106,7 @@ program
   .argument('<propertyName>', 'Property name to add to the Frontmatter')
   .argument('[propertyValue]', 'Property value for the provided propertyName', '')
   .option('-d, --debug', 'Debug mode')
-  .option('-o, --override', 'Override existing property')
+  .option('-o, --overwrite', 'Overwrite an existing property value')
   .option('-f, --flat', 'Disable directory recursion')
   .action((sourcePath, propertyName, propertyValue) => {
 
