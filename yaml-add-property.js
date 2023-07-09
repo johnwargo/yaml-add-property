@@ -13,7 +13,7 @@ const questions = [
     {
         type: 'text',
         name: 'sourcePath',
-        initial: 'src/posts',
+        initial: 'posts',
         message: 'Source folder for posts?'
     }, {
         type: 'text',
@@ -69,7 +69,7 @@ function getAllFilesFlat(dirPath) {
     return fileArray;
 }
 function generateFileList(filePath, recurseFolders) {
-    log.info('Building file list...');
+    log.info('\nBuilding file list...');
     if (recurseFolders) {
         log.debug('Recursing directories');
         return getAllFilesDeep(filePath, []);
@@ -104,13 +104,15 @@ const propertyName = response.propertyName;
 const propertyValue = response.propertyValue;
 const overrideMode = response.override;
 const recurseFolders = response.recurseFolders;
-log.info('Option: Override mode ' + overrideMode ? 'enabled' : 'disabled');
-log.info('Option: Folder recursion ' + recurseFolders ? 'enabled' : 'disabled');
+let msg = overrideMode ? 'enabled' : 'disabled';
+log.info(`\nOption: Override mode ${msg}`);
+msg = recurseFolders ? 'enabled' : 'disabled';
+log.info(`Option: Folder recursion ${msg}`);
 if (!directoryExists(path.join(process.cwd(), sourcePath))) {
     log.error(`\nSource path '${sourcePath}' does not exist, exiting`);
     process.exit(1);
 }
-log.info(`\nSource path: ${sourcePath}`);
+log.info(`Source path: ${sourcePath}`);
 fileList = generateFileList(sourcePath, recurseFolders);
 if (fileList.length < 1) {
     log.error('\nNo files found in the target folder, exiting');
@@ -130,6 +132,7 @@ fileList.forEach(function (theFile) {
             log.debug(`Adding ${propertyName}: ${propertyValue}`);
             frontmatter[propertyName] = propertyValue;
             let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
+            tmpFrontmatter = tmpFrontmatter.replaceAll('""', '');
             tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
             tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
             log.info(`Writing changes to ${theFile}`);

@@ -27,7 +27,7 @@ const questions: any[] = [
   {
     type: 'text',
     name: 'sourcePath',
-    initial: 'src/posts',
+    initial: 'posts',
     message: 'Source folder for posts?'
   }, {
     type: 'text',
@@ -97,7 +97,7 @@ function getAllFilesFlat(dirPath: string): string[] {
 function generateFileList(filePath: string, recurseFolders: boolean): String[] {
   // this function kicks off the process of building the file list
   // the call to `getAllFiles` is separate because that function is recursive
-  log.info('Building file list...');
+  log.info('\nBuilding file list...');
   if (recurseFolders) {
     log.debug('Recursing directories');
     return getAllFilesDeep(filePath, []);
@@ -139,15 +139,17 @@ const propertyValue = response.propertyValue;
 const overrideMode = response.override;
 const recurseFolders = response.recurseFolders;
 
-log.info('Option: Override mode ' + overrideMode ? 'enabled' : 'disabled');
-log.info('Option: Folder recursion ' + recurseFolders ? 'enabled' : 'disabled');
+let msg = overrideMode ? 'enabled' : 'disabled';
+log.info(`\nOption: Override mode ${msg}`);
+msg = recurseFolders ? 'enabled' : 'disabled'
+log.info(`Option: Folder recursion ${msg}`);
 
 if (!directoryExists(path.join(process.cwd(), sourcePath))) {
   log.error(`\nSource path '${sourcePath}' does not exist, exiting`);
   process.exit(1);
 }
 
-log.info(`\nSource path: ${sourcePath}`);
+log.info(`Source path: ${sourcePath}`);
 fileList = generateFileList(sourcePath, recurseFolders);
 if (fileList.length < 1) {
   log.error('\nNo files found in the target folder, exiting');
@@ -175,6 +177,8 @@ fileList.forEach(function (theFile: any) {
       frontmatter[propertyName] = propertyValue;
       // convert the JSON frontmatter to YAML format
       let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
+      // remove the quotes from empty values
+      tmpFrontmatter = tmpFrontmatter.replaceAll('""', '');
       // remove the extra carriage return from the end of the frontmatter
       tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
       // replace the YAML frontmatter in the file
