@@ -99,6 +99,10 @@ log.level(debugMode ? log.DEBUG : log.INFO);
 log.debug('Option: Debug mode enabled\n');
 log.debug(`cwd: ${process.cwd()}`);
 const response = await prompts(questions);
+if (typeof response.recurseFolders === 'undefined') {
+    log.error('\nCancelled by user, exiting...');
+    process.exit(1);
+}
 const sourcePath = response.sourcePath;
 const propertyName = response.propertyName;
 const propertyValue = response.propertyValue;
@@ -131,8 +135,11 @@ fileList.forEach(function (theFile) {
         if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
             log.debug(`Adding ${propertyName}: ${propertyValue}`);
             frontmatter[propertyName] = propertyValue;
+            for (var key in frontmatter) {
+                frontmatter[key] = (frontmatter[key] !== null) && (frontmatter[key] != "") ? frontmatter[key] : '';
+            }
             let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
-            tmpFrontmatter = tmpFrontmatter.replaceAll('""', '');
+            tmpFrontmatter = tmpFrontmatter.replaceAll(': ""', ': ');
             tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
             tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
             log.info(`Writing changes to ${theFile}`);

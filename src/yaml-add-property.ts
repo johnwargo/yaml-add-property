@@ -133,6 +133,13 @@ log.debug('Option: Debug mode enabled\n');
 log.debug(`cwd: ${process.cwd()}`);
 
 const response = await prompts(questions);
+// did the user cancel?
+if (typeof response.recurseFolders === 'undefined') {
+  // get outta here
+  log.error('\nCancelled by user, exiting...');
+  process.exit(1);
+}
+
 const sourcePath = response.sourcePath;
 const propertyName = response.propertyName;
 const propertyValue = response.propertyValue;
@@ -175,10 +182,14 @@ fileList.forEach(function (theFile: any) {
       log.debug(`Adding ${propertyName}: ${propertyValue}`);
       // Add our property and value to the frontmatter
       frontmatter[propertyName] = propertyValue;
+      // ensure all front matter properties are populated at least with an empty string
+      for (var key in frontmatter) {
+        frontmatter[key] = (frontmatter[key] !== null) && (frontmatter[key] != "") ? frontmatter[key] : '';
+      }
       // convert the JSON frontmatter to YAML format
       let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
       // remove the quotes from empty values
-      tmpFrontmatter = tmpFrontmatter.replaceAll('""', '');
+      tmpFrontmatter = tmpFrontmatter.replaceAll(': ""', ': ');
       // remove the extra carriage return from the end of the frontmatter
       tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
       // replace the YAML frontmatter in the file
