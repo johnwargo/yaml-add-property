@@ -6,9 +6,9 @@
  * Created April 2021
  */
 
-import { Command } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
+import prompts from 'prompts';
 import YAML from 'yaml'
 //@ts-ignore
 import logger from 'cli-logger';
@@ -16,12 +16,41 @@ var log = logger();
 
 const APP_NAME = '\nYAML Add/Update Property';
 const APP_AUTHOR = 'by John M. Wargo (https://johnwargo.com)';
-const APP_VERSION = '0.0.1';
-const program = new Command();
+const APP_VERSION = '0.0.6';
+
 // get CR and/or LF, accommodates DOS and Unix file formats
 // const YAML_PATTERN = /---[\r\n].*?[\r\n]---/s
 const YAML_PATTERN = /(?<=---[\r\n]).*?(?=[\r\n]---)/s
 // https://stackoverflow.com/questions/75845110/javascript-regex-to-replace-yaml-frontmatter/75845227#75845227
+
+const questions: any[] = [
+  {
+    type: 'text',
+    name: 'sourcePath',
+    initial: 'posts',
+    message: 'Source folder for posts?'
+  }, {
+    type: 'text',
+    name: 'propertyName',
+    message: 'Property to add to YAML front matter?',
+    initial: ''
+  }, {
+    type: 'text',
+    name: 'propertyValue',
+    message: 'Property value?',
+    initial: ''
+  }, {
+    type: 'confirm',
+    name: 'override',
+    initial: false,
+    message: 'Override existing property values?'
+  }, {
+    type: 'confirm',
+    name: 'recurseFolders',
+    initial: true,
+    message: 'Process subfolders??'
+  }
+];
 
 var fileList: String[] = [];
 
@@ -65,16 +94,16 @@ function getAllFilesFlat(dirPath: string): string[] {
   return fileArray;
 }
 
-function generateFileList(filePath: string, flatMode: boolean): String[] {
+function generateFileList(filePath: string, recurseFolders: boolean): String[] {
   // this function kicks off the process of building the file list
   // the call to `getAllFiles` is separate because that function is recursive
-  log.info('Building file list...');
-  if (flatMode) {
-    log.debug('Skipping directory recursion');
-    return getAllFilesFlat(filePath);
-  } else {
+  log.info('\nBuilding file list...');
+  if (recurseFolders) {
     log.debug('Recursing directories');
     return getAllFilesDeep(filePath, []);
+  } else {
+    log.debug('Skipping directory recursion');
+    return getAllFilesFlat(filePath);
   }
 }
 
@@ -98,74 +127,79 @@ console.log(APP_NAME);
 console.log(APP_AUTHOR);
 console.log();
 
-program
-  .version(APP_VERSION)
-  .argument('<sourcePath>', 'Root folder location for source files')
-  .argument('<propertyName>', 'Property name to add to the Frontmatter')
-  .argument('[propertyValue]', 'Property value for the provided propertyName', '')
-  .option('-d, --debug', 'Debug mode')
-  .option('-o, --overwrite', 'Overwrite an existing property value')
-  .option('-f, --flat', 'Disable directory recursion')
-  .action((sourcePath, propertyName, propertyValue) => {
+const debugMode = process.argv.includes('-d');
+log.level(debugMode ? log.DEBUG : log.INFO);
+log.debug('Option: Debug mode enabled\n');
+log.debug(`cwd: ${process.cwd()}`);
 
-    const options = program.opts();
-    const debugMode = options.debug;
-    const overrideMode = options.override;
-    const flatMode = options.flat;
+const response = await prompts(questions);
+// did the user cancel?
+if (typeof response.recurseFolders === 'undefined') {
+  // get outta here
+  log.error('\nCancelled by user, exiting...');
+  process.exit(1);
+}
 
-    // set the logger log level
-    log.level(debugMode ? log.DEBUG : log.INFO);
-    log.debug('Option: Debug mode enabled');
-    if (overrideMode) log.info('Option: Override mode enabled');
-    if (flatMode) log.info('Option: Flat mode enabled');
-    log.debug(`cwd: ${process.cwd()}`);
+const sourcePath = response.sourcePath;
+const propertyName = response.propertyName;
+const propertyValue = response.propertyValue;
+const overrideMode = response.override;
+const recurseFolders = response.recurseFolders;
 
-    if (!directoryExists(path.join(process.cwd(), sourcePath))) {
-      log.error(`\nSource path '${sourcePath}' does not exist, exiting`);
-      process.exit(1);
-    }
+let msg = overrideMode ? 'enabled' : 'disabled';
+log.info(`\nOption: Override mode ${msg}`);
+msg = recurseFolders ? 'enabled' : 'disabled'
+log.info(`Option: Folder recursion ${msg}`);
 
-    log.info(`\nSource path: ${sourcePath}`);
-    fileList = generateFileList(sourcePath, flatMode);
-    if (fileList.length < 1) {
-      log.error('\nNo files found in the target folder, exiting');
-      process.exit(0);
-    }
+if (!directoryExists(path.join(process.cwd(), sourcePath))) {
+  log.error(`\nSource path '${sourcePath}' does not exist, exiting`);
+  process.exit(1);
+}
 
-    log.info(`Located ${fileList.length} files`);
-    if (debugMode) console.dir(fileList);
+log.info(`Source path: ${sourcePath}`);
+fileList = generateFileList(sourcePath, recurseFolders);
+if (fileList.length < 1) {
+  log.error('\nNo files found in the target folder, exiting');
+  process.exit(0);
+}
 
-    fileList.forEach(function (theFile: any) {
-      log.debug(`\nReading ${theFile}`);
-      let tempFile = fs.readFileSync(theFile, 'utf8');
-      // remove all of the carriage returns from the file
-      tempFile = tempFile.replace(/\r/g, '');
+log.info(`Located ${fileList.length} files`);
+if (debugMode) console.dir(fileList);
 
-      // get the YAML frontmatter
-      let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
-      if (tempDoc.length > 0) {
-        // convert the YAML frontmatter to a JSON object        
-        let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
-        // if (debugMode) console.dir(frontmatter);
-        if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
-          log.debug(`Adding ${propertyName}: ${propertyValue}`);
-          // Add our property and value to the frontmatter
-          frontmatter[propertyName] = propertyValue;
-          // convert the JSON frontmatter to YAML format
-          let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
-          // remove the extra carriage return from the end of the frontmatter
-          tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
-          // replace the YAML frontmatter in the file
-          tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
-          log.info(`Writing changes to ${theFile}`);
-          fs.writeFileSync(theFile, tempFile);
-        } else {
-          log.warn(`Skipping ${theFile}, '${propertyName}' already exists`);
-        }
-      } else {
-        log.warn(`Skipping ${theFile}, No YAML frontmatter found.`);
+fileList.forEach(function (theFile: any) {
+  log.debug(`\nReading ${theFile}`);
+  let tempFile = fs.readFileSync(theFile, 'utf8');
+  // remove all of the carriage returns from the file
+  tempFile = tempFile.replace(/\r/g, '');
+
+  // get the YAML frontmatter
+  let tempDoc = YAML.parseAllDocuments(tempFile, { logLevel: 'silent' });
+  if (tempDoc.length > 0) {
+    // convert the YAML frontmatter to a JSON object        
+    let frontmatter = JSON.parse(JSON.stringify(tempDoc))[0];
+    // if (debugMode) console.dir(frontmatter);
+    if (!frontmatter[propertyName] || (overrideMode && frontmatter[propertyName])) {
+      log.debug(`Adding ${propertyName}: ${propertyValue}`);
+      // Add our property and value to the frontmatter
+      frontmatter[propertyName] = propertyValue;
+      // ensure all front matter properties are populated at least with an empty string
+      for (var key in frontmatter) {
+        frontmatter[key] = (frontmatter[key] !== null) && (frontmatter[key] != "") ? frontmatter[key] : '';
       }
-    });
-  });
-
-program.parse();
+      // convert the JSON frontmatter to YAML format
+      let tmpFrontmatter = YAML.stringify(frontmatter, { logLevel: 'silent' });
+      // remove the quotes from empty values
+      tmpFrontmatter = tmpFrontmatter.replaceAll(': ""', ': ');
+      // remove the extra carriage return from the end of the frontmatter
+      tmpFrontmatter = tmpFrontmatter.replace(/\n$/, '');
+      // replace the YAML frontmatter in the file
+      tempFile = tempFile.replace(YAML_PATTERN, tmpFrontmatter);
+      log.info(`Writing changes to ${theFile}`);
+      fs.writeFileSync(theFile, tempFile);
+    } else {
+      log.warn(`Skipping ${theFile}, '${propertyName}' already exists`);
+    }
+  } else {
+    log.warn(`Skipping ${theFile}, No YAML frontmatter found.`);
+  }
+});
