@@ -9,3 +9,4 @@ changelog.md
 tsconfig.json
 copy-posts.cmd
 copy-posts.sh
+pub.mjs
