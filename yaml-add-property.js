@@ -34,7 +34,7 @@ const questions = [
         type: 'confirm',
         name: 'recurseFolders',
         initial: true,
-        message: 'Process subfolders??'
+        message: 'Process subfolders?'
     }
 ];
 var fileList = [];
@@ -150,6 +150,6 @@ fileList.forEach(function (theFile) {
         }
     }
     else {
-        log.warn(`Skipping ${theFile}, No YAML frontmatter found.`);
+        log.warn(`Skipping ${theFile}, No YAML front matter found.`);
     }
 });

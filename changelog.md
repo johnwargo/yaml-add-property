@@ -1,5 +1,9 @@
 # Changelog
 
+# 20230710 0.0.7
+
+I forgot to update the docs before I published the previous version.
+
 ## 20230710 0.0.6
 
 * Made the GitHub project public

@@ -48,7 +48,7 @@ const questions: any[] = [
     type: 'confirm',
     name: 'recurseFolders',
     initial: true,
-    message: 'Process subfolders??'
+    message: 'Process subfolders?'
   }
 ];
 
@@ -200,6 +200,6 @@ fileList.forEach(function (theFile: any) {
       log.warn(`Skipping ${theFile}, '${propertyName}' already exists`);
     }
   } else {
-    log.warn(`Skipping ${theFile}, No YAML frontmatter found.`);
+    log.warn(`Skipping ${theFile}, No YAML front matter found.`);
   }
 });
